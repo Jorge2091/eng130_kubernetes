@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: jorge2091/eng130_jorge_nginx:latest # use the image that you built
+        image: jorge2091/nginx:latest # use the image that you built
         ports:
         - containerPort: 80
 
