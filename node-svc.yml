@@ -1,0 +1,20 @@
+# select the type of API version and type of service/object
+apiVersion: v1
+kind: Service
+# metadata for name
+metadata:
+  name: node-svc
+  namespace: default # sre
+# Specification to include ports selector to connect to the deployment
+spec:
+  ports:
+  - nodePort: 30001 # range is 3000-32768
+    port: 80
+
+
+    targetPort: 3000
+# let's define the selector and label to connect to nginx deployment
+  selector:
+    app: node # this label connects this service to deployment
+  # creating nodeport type of deployment
+  type: LoadBalancer # also use loadBalancer - for local use cluster IP

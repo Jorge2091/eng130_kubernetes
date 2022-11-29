@@ -79,7 +79,7 @@ Use "kubectl options" for a list of global command-line options (applies to all 
 
 ```
 
-# applying node app with kubernetes
+## applying node app with kubernetes
 
 <img src="./images/node.png"/>
 similar to deploying nginx docker with kubernetes, we can do the same with our node app, all we have to do is change the nginx image or our node image and make sure port 3000 is being listened.
@@ -112,3 +112,4 @@ spec:
         ports:
         - containerPort: 3000
 ```
+To run this new 
