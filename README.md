@@ -78,3 +78,37 @@ Use "kubectl <command> --help" for more information about a given command.
 Use "kubectl options" for a list of global command-line options (applies to all commands).
 
 ```
+
+# applying node app with kubernetes
+
+<img src="./images/node.png"/>
+similar to deploying nginx docker with kubernetes, we can do the same with our node app, all we have to do is change the nginx image or our node image and make sure port 3000 is being listened.
+in a new yaml file, we can write
+
+```Yaml
+apiVersion: apps/v1 # which api to use for deployment
+kind: Deployment # What lind of service/object you want to create
+# What would you like to call it - name service/object
+metadata: 
+  name: node-deployment # naming the deployment
+
+spec: 
+  selector:
+    matchLabels:
+      app: node_app # look for this label to match with k8 service
+  # let's create a replica set of this with instance/pods
+  replicas: 3
+  # template to use it's label for k8 service to launch in the browser
+  template:
+    metadata:
+      labels:
+        app: node_app # This label connects to
+                   # the service or any other k8 components
+    # Let's define the container 
+    spec:
+      containers:
+      - name: node_app
+        image: jorge2091/eng130_jorge_nodejs # use the image that you built
+        ports:
+        - containerPort: 3000
+```
