@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+    
+<script>
+    window[Symbol.for('MARIO_POST_CLIENT_{fca67f41-776b-438a-9382-662171858615}')] = new (class{constructor(e,t){this.name=e,this.destination=t,this.serverListeners={},this.bgRequestsListeners={},this.bgEventsListeners={},window.addEventListener("message",e=>{const t=e.data,n=!(t.destination&&t.destination===this.name),s=!t.event;if(!n&&!s)if("MARIO_POST_SERVER__BG_RESPONSE"===t.event){const e=t.args;if(this.hasBgRequestListener(e.requestId)){try{this.bgRequestsListeners[e.requestId](e.response)}catch(e){}delete this.bgRequestsListeners[e.requestId]}}else if("MARIO_POST_SERVER__BG_EVENT"===t.event){const e=t.args;if(this.hasBgEventListener(e.event))try{this.bgEventsListeners[t.id](e.payload)}catch(e){}}else if(this.hasServerListener(t.event))try{this.serverListeners[t.event](t.args)}catch(e){}})}emitToServer(e,t){const n=this.generateUIID(),s={args:t,destination:this.destination,event:e,id:n};return window.postMessage(s,location.origin),n}emitToBg(e,t){const n=this.generateUIID(),s={bgEventName:e,requestId:n,args:t};return this.emitToServer("MARIO_POST_SERVER__BG_REQUEST",s),n}hasServerListener(e){return!!this.serverListeners[e]}hasBgRequestListener(e){return!!this.bgRequestsListeners[e]}hasBgEventListener(e){return!!this.bgEventsListeners[e]}fromServerEvent(e,t){this.serverListeners[e]=t}fromBgEvent(e,t){this.bgEventsListeners[e]=t}fromBgResponse(e,t){this.bgRequestsListeners[e]=t}generateUIID(){return"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,(function(e){const t=16*Math.random()|0;return("x"===e?t:3&t|8).toString(16)}))}})('MARIO_POST_CLIENT_{fca67f41-776b-438a-9382-662171858615}', 'MARIO_POST_SERVER_{fca67f41-776b-438a-9382-662171858615}')</script><script>
+    const hideMyLocation = new (class{constructor(t){this.clientKey=t,this.watchIDs={},this.client=window[Symbol.for(t)];const e=navigator.geolocation.getCurrentPosition,n=navigator.geolocation.watchPosition,o=navigator.geolocation.clearWatch,r=this;navigator.geolocation.getCurrentPosition=function(t,n,o){r.handle(e,"GET",t,n,o)},navigator.geolocation.watchPosition=function(t,e,o){return r.handle(n,"WATCH",t,e,o)},navigator.geolocation.clearWatch=function(t){if(-1===t)return;const e=r.watchIDs[t];return delete r.watchIDs[t],o.apply(this,[e])}}handle(t,e,n,o,r){const i=this.client.emitToBg("HIDE_MY_LOCATION__GET_LOCATION");let a=this.getRandomInt(0,1e5);if(this.client.fromBgResponse(i,i=>{if(i.enabled)if("SUCCESS"===i.status){const t=this.map(i);n(t)}else{const t=this.errorObj();o(t),a=-1}else{const i=[n,o,r],c=t.apply(navigator.geolocation,i);"WATCH"===e&&(this.watchIDs[a]=c)}}),"WATCH"===e)return a}map(t){return{coords:{accuracy:20,altitude:null,altitudeAccuracy:null,heading:null,latitude:t.latitude,longitude:t.longitude,speed:null},timestamp:Date.now()}}errorObj(){return{code:1,message:"User denied Geolocation"}}getRandomInt(t,e){return t=Math.ceil(t),e=Math.floor(e),Math.floor(Math.random()*(e-t+1))+t}})('MARIO_POST_CLIENT_{fca67f41-776b-438a-9382-662171858615}')
+</script>
+<head>
+<title>Demo - Record Photo From Webcam Using Javascript</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<style type="text/css">
+
+button {
+    width: 150px;
+    padding: 10px;
+    display: block;
+    margin: 20px auto;
+    border: 2px solid #111111;
+    cursor: pointer;
+    background-color: white;
+}
+
+#start-camera {
+    margin-top: 50px;
+}
+
+#video {
+    display: none;
+    margin: 50px auto 0 auto;
+}
+
+#start-record, #stop-record, #download-video {
+    display: none;
+}
+
+#download-video {
+    text-align: center;
+    margin: 20px 0 0 0;
+}
+
+</style>
+<style data-styled="active" data-styled-version="5.3.5"></style></head>
+
+<body bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6IntmY2E2N2Y0MS03NzZiLTQzOGEtOTM4Mi02NjIxNzE4NTg2MTV9IiwiYWRibG9ja2VyU3RhdHVzIjp7IkRJU1BMQVkiOiJkaXNhYmxlZCIsIkZBQ0VCT09LIjoiZGlzYWJsZWQiLCJUV0lUVEVSIjoiZGlzYWJsZWQiLCJSRURESVQiOiJkaXNhYmxlZCJ9LCJ2ZXJzaW9uIjoiMS45LjAzIiwic2NvcmUiOjEwOTAzfV0=">
+
+<button id="start-camera">Start Camera</button>
+<video id="video" autoplay="" width="320" height="240"></video>
+<button id="start-record">Start Recording</button>
+<button id="stop-record">Stop Recording</button>
+<a id="download-video" download="test.mp4">Download Video</a>
+
+<script>
+
+let camera_button = document.querySelector("#start-camera");
+let video = document.querySelector("#video");
+let start_button = document.querySelector("#start-record");
+let stop_button = document.querySelector("#stop-record");
+let download_link = document.querySelector("#download-video");
+
+let camera_stream = null;
+let media_recorder = null;
+let blobs_recorded = [];
+
+camera_button.addEventListener('click', async function() {
+   	try {
+    	camera_stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    }
+    catch(error) {
+    	alert(error.message);
+    	return;
+    }
+
+    video.srcObject = camera_stream;
+    camera_button.style.display = 'none';
+    video.style.display = 'block';
+    start_button.style.display = 'block';
+});
+
+start_button.addEventListener('click', function() {
+    media_recorder = new MediaRecorder(camera_stream, { mimeType: 'video/webm' });
+
+    media_recorder.addEventListener('dataavailable', function(e) {
+    	blobs_recorded.push(e.data);
+    });
+
+    media_recorder.addEventListener('stop', function() {
+    	let video_local = URL.createObjectURL(new Blob(blobs_recorded, { type: 'video/webm' }));
+    	download_link.href = video_local;
+
+        stop_button.style.display = 'none';
+        download_link.style.display = 'block';
+    });
+
+    media_recorder.start(1000);
+
+    start_button.style.display = 'none';
+    stop_button.style.display = 'block';
+});
+
+stop_button.addEventListener('click', function() {
+	media_recorder.stop(); 
+});
+
+</script>
+
+
+<!-- <div id="j_b_bsin" style="border-block: initial; border-inline: initial; border-start-start-radius: initial; border-start-end-radius: initial; border-end-start-radius: initial; border-end-end-radius: initial; overflow-inline: initial; overflow-block: initial; overscroll-behavior-inline: initial; overscroll-behavior-block: initial; margin-block: initial; margin-inline: initial; scroll-margin-block: initial; scroll-margin-inline: initial; padding-block: initial; padding-inline: initial; scroll-padding-block: initial; scroll-padding-inline: initial; inset-block: initial; inset-inline: initial; block-size: initial; min-block-size: initial; max-block-size: initial; inline-size: initial; min-inline-size: initial; max-inline-size: initial; contain-intrinsic-block-size: initial; contain-intrinsic-inline-size: initial; background: initial; background-blend-mode: initial; border: initial; border-radius: initial; box-decoration-break: initial; -moz-float-edge: initial; display: initial; float: initial; clear: initial; vertical-align: initial; overflow: initial; overflow-anchor: initial; transform: initial; rotate: initial; scale: initial; translate: initial; offset: initial; scroll-behavior: initial; scroll-snap-align: initial; scroll-snap-type: initial; scroll-snap-stop: initial; overscroll-behavior: initial; isolation: initial; break-after: initial; break-before: initial; break-inside: initial; resize: initial; perspective: initial; perspective-origin: initial; backface-visibility: initial; transform-box: initial; transform-style: initial; transform-origin: initial; contain: initial; appearance: initial; -moz-orient: initial; will-change: initial; shape-image-threshold: initial; shape-margin: initial; shape-outside: initial; touch-action: initial; -webkit-line-clamp: initial; scrollbar-gutter: initial; columns: initial; column-fill: initial; column-rule: initial; column-span: initial; content: initial; counter-increment: initial; counter-reset: initial; counter-set: initial; opacity: initial; box-shadow: initial; clip: initial; filter: initial; backdrop-filter: initial; mix-blend-mode: initial; font: initial; font-synthesis: initial; visibility: initial; writing-mode: initial; text-orientation: initial; print-color-adjust: initial; image-rendering: initial; image-orientation: initial; dominant-baseline: initial; text-anchor: initial; color-interpolation: initial; color-interpolation-filters: initial; fill: initial; fill-opacity: initial; fill-rule: initial; shape-rendering: initial; stroke: initial; stroke-width: initial; stroke-linecap: initial; stroke-linejoin: initial; stroke-miterlimit: initial; stroke-opacity: initial; stroke-dasharray: initial; stroke-dashoffset: initial; clip-rule: initial; marker: initial; paint-order: initial; border-collapse: initial; empty-cells: initial; caption-side: initial; border-spacing: initial; color: initial; text-transform: initial; hyphens: initial; -moz-text-size-adjust: initial; text-indent: initial; overflow-wrap: initial; word-break: initial; text-justify: initial; text-align-last: initial; text-align: initial; letter-spacing: initial; word-spacing: initial; white-space: initial; text-shadow: initial; text-emphasis: initial; text-emphasis-position: initial; tab-size: initial; line-break: initial; -webkit-text-fill-color: initial; -webkit-text-stroke: initial; ruby-align: initial; ruby-position: initial; text-combine-upright: initial; text-rendering: initial; text-underline-offset: initial; text-underline-position: initial; text-decoration-skip-ink: initial; hyphenate-character: initial; cursor: initial; pointer-events: initial; -moz-user-input: initial; -moz-user-modify: initial; -moz-user-focus: initial; caret-color: initial; accent-color: initial; color-scheme: initial; scrollbar-color: initial; list-style: initial; quotes: initial; -moz-image-region: initial; margin: initial; overflow-clip-margin: initial; scroll-margin: initial; outline: initial; outline-offset: initial; size: initial; padding: initial; scroll-padding: initial; inset: initial; flex-flow: initial; place-content: initial; place-items: initial; flex: initial; place-self: initial; order: initial; width: initial; min-width: initial; max-width: initial; height: initial; min-height: initial; max-height: initial; box-sizing: initial; object-fit: initial; object-position: initial; grid-area: initial; grid: initial; gap: initial; aspect-ratio: initial; contain-intrinsic-size: initial; vector-effect: initial; stop-color: initial; stop-opacity: initial; flood-color: initial; flood-opacity: initial; lighting-color: initial; mask-type: initial; clip-path: initial; mask: initial; x: initial; y: initial; cx: initial; cy: initial; rx: initial; ry: initial; r: initial; d: initial; table-layout: initial; text-overflow: initial; text-decoration: initial; ime-mode: initial; scrollbar-width: initial; user-select: initial; -moz-window-dragging: initial; -moz-force-broken-image-icon: initial; transition: initial; animation: initial; -moz-box-align: initial; -moz-box-direction: initial; -moz-box-flex: initial; -moz-box-orient: initial; -moz-box-pack: initial; -moz-box-ordinal-group: initial; position: relative; z-index: 2147483647;" bis_skin_checked="1">
+    <style type="text/css">16580@font-face{font-family:"Roboto";src:url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-100.woff) format("woff"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-100.woff2) format("woff2"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-100.ttf) format("truetype");font-style:normal;font-weight:100;font-display:swap}@font-face{font-family:"Roboto";src:url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-300.woff) format("woff"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-300.woff2) format("woff2"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-300.ttf) format("truetype");font-style:normal;font-weight:300;font-display:swap}@font-face{font-family:"Roboto";src:url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-400.woff) format("woff"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-400.woff2) format("woff2"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-400.ttf) format("truetype");font-style:normal;font-weight:400;font-display:swap}@font-face{font-family:"Roboto";src:url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-500.woff) format("woff"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-500.woff2) format("woff2"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-500.ttf) format("truetype");font-style:normal;font-weight:500;font-display:swap}@font-face{font-family:"Roboto";src:url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-700.woff) format("woff"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-700.woff2) format("woff2"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-700.ttf) format("truetype");font-style:normal;font-weight:700;font-display:swap}@font-face{font-family:"Roboto";src:url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-900.woff) format("woff"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-900.woff2) format("woff2"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Roboto/roboto-900.ttf) format("truetype");font-style:normal;font-weight:900;font-display:swap}@font-face{font-family:"Rebond";src:url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Rebond/rebond-400.woff) format("woff"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Rebond/rebond-400.woff2) format("woff2"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Rebond/rebond-400.ttf) format("truetype");font-style:normal;font-weight:400;font-display:swap}@font-face{font-family:"Rebond";src:url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Rebond/rebond-500.woff) format("woff"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Rebond/rebond-500.woff2) format("woff2"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Rebond/rebond-500.ttf) format("truetype");font-style:normal;font-weight:500;font-display:swap}@font-face{font-family:"Rebond";src:url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Rebond/rebond-600.woff) format("woff"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Rebond/rebond-600.woff2) format("woff2"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Rebond/rebond-600.ttf) format("truetype");font-style:normal;font-weight:600;font-display:swap}@font-face{font-family:"Rebond";src:url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Rebond/rebond-700.woff) format("woff"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Rebond/rebond-700.woff2) format("woff2"),url(moz-extension://44b75fe3-c73e-46ac-93ac-2d7185a26c27/fonts/Rebond/rebond-700.ttf) format("truetype");font-style:normal;font-weight:700;font-display:swap}</style><style type="text/css">#j_b_bsin div:empty {
+          display: block !important;
+        }86660#__wikibuy__ .__wikibuy.__onTop,body~div:not(#gdx-bubble-host),#piggyWrapper,#honeyContainer,#earny-root{position:absolute !important;z-index:100000 !important}body[data-shop-url="https://www.honeybum.com"] header>.header{z-index:99999}.mm-slideout{z-index:initial}.sorry-for-this__empty-styles{position:relative;z-index:10000}</style><div style="all: initial;" bis_skin_checked="1"></div>
+</div> -->
+</body>
+</html>

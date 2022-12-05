@@ -113,3 +113,5 @@ spec:
         - containerPort: 3000
 ```
 To run this new 
+kubeadm join 172.31.20.117:6443 --token dmvu2w.0tibsuk4bg30js9l \
+    --discovery-token-ca-cert-hash sha256:defe339e7c066c8138478f9100961369cda8e018711f237eb2c3cfaaaa61dd63
